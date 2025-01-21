@@ -1,0 +1,35 @@
+name: CI
+
+on: [push]
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv and set Python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: 'uv.lock'
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Type check with mypy
+        run: uv run mypy src/
+
+      - name: Lint with Ruff
+        run: uv run ruff check src/
+
+      - name: Format check with Black
+        run: uv run black src/ --check
+
+      - name: Run tests
+        run: uv run pytest
+
+      - name: Build package
+        run: uv build
